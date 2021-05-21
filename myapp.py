@@ -30,7 +30,7 @@ for i, j in enumerate(tickers):
     else:
         tickers[i] = j + '.SA'
 
-start = st.sidebar.date_input('Período inicial')
+start = st.sidebar.date_input('Período inicial',value=datetime(2020,1,1))
 end = st.sidebar.date_input('Período final')
 data = pdr.DataReader(tickers,data_source='yahoo',
                         start=start, end=end)
@@ -65,10 +65,12 @@ df_return = df.apply(lambda x: x/x[0])
 st.write("""
 ## Retornos diários
 """)
+
 df_perc_change = df.pct_change().dropna()
 fig3, df_perc_change_melted = plot_melted(df_perc_change, 'Retorno diário')
 
 st.plotly_chart(fig3,use_container_width=True)
+
 
 st.write("""
 ## Retornos diários acumulados
