@@ -60,6 +60,12 @@ def plot_melted(df, yaxis = 'Preço Ajustado',dash = False):
     fig.show()
     return fig, df_melt
 
+st.write("""
+### **Autor**: Yuri Ishizawa
+### [Github](http://github.com/yuriishizawa)
+### [LinkedIn](http://linkedin.com/in/yuriishizawa)
+""")
+
 df_return = df.apply(lambda x: x/x[0])
 
 st.write("""
