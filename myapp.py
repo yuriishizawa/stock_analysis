@@ -3,19 +3,24 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import plotly.express as px
 import plotly.graph_objects as go
+import plotly.figure_factory as ff
 import streamlit as st
+from datetime import datetime
 
 import pandas_datareader as pdr
 import yfinance as yf
 
 sns.set()
 
-st.title("""
-App para análise de ações
+st.sidebar.title("""
+Análise de ações brasileiras
 """
 )
 
-text1 = st.text_input('Digite os tickers separados por vírgula e sem espaço')
+st.title("Análise de ações brasileiras")
+
+text1 = st.sidebar.text_area('Digite os tickers separados por vírgula e sem espaço',
+                            value="BBAS3,ITSA4,VALE3,PETR4")
 
 tickers = text1.split(',')
 
@@ -25,8 +30,8 @@ for i, j in enumerate(tickers):
     else:
         tickers[i] = j + '.SA'
 
-start = st.date_input('Período inicial')
-end = st.date_input('Período final')
+start = st.sidebar.date_input('Período inicial')
+end = st.sidebar.date_input('Período final')
 data = pdr.DataReader(tickers,data_source='yahoo',
                         start=start, end=end)
 
@@ -58,7 +63,7 @@ def plot_melted(df, yaxis = 'Preço Ajustado',dash = False):
 df_return = df.apply(lambda x: x/x[0])
 
 st.write("""
-# Gráfico de retornos diários
+## Retornos diários
 """)
 df_perc_change = df.pct_change().dropna()
 fig3, df_perc_change_melted = plot_melted(df_perc_change, 'Retorno diário')
@@ -66,14 +71,14 @@ fig3, df_perc_change_melted = plot_melted(df_perc_change, 'Retorno diário')
 st.plotly_chart(fig3,use_container_width=True)
 
 st.write("""
-# Gráfico de retornos diários acumulados
+## Retornos diários acumulados
 """)
 fig1, df_return_melted = plot_melted(df_return, 
                     'Retorno diário acumulado', dash=True)
 st.plotly_chart(fig1,use_container_width=True)
 
 st.write("""
-# Gráfico de média de retornos diários vs Volatilidade (Desvio-padrão)
+## Média de retornos diários vs Volatilidade (Desvio-padrão)
 """)
 
 mean_std = pd.DataFrame(df_perc_change.mean(),index=df_perc_change.mean().index, columns=['Média'])
@@ -84,10 +89,9 @@ fig4.add_hline(0,line_dash='dash')
 st.plotly_chart(fig4, use_container_width=True)
 
 st.write("""
-# Análise de clusters hierárquicos das ações correlatas
+## Análise de clusters hierárquicos das ações correlatas
 """)
 
-ax = sns.clustermap(data = df_return,row_cluster=False, metric='correlation',
-               figsize=(16,6),yticklabels=False,standard_scale=1,dendrogram_ratio=(.1, .2),cbar_pos=(0, .2, .03, .4))
+ax = ff.create_dendrogram(df_return.T, labels=df_return.columns)
 
-st.pyplot(ax, use_container_width=False)
+st.plotly_chart(ax, use_container_width=False)
