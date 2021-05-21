@@ -1,4 +1,3 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -11,13 +10,14 @@ import yfinance as yf
 
 sns.set()
 
-st.write("""
-# App para análise de ações
+st.title("""
+App para análise de ações
 """
 )
 
-tickers = ['VALE3', 'PETR4', 'BPAC3', 'ABEV3', 'ITUB4', 'SANB4', 'AZUL4', 'BBDC4', 'KLBN4', 'BBAS3',
-           'ITSA4', 'JBSS3', 'GOLL4', 'SUZB3', 'VIVT3', 'CSNA3', 'ELET3', 'B3SA3', 'WEGE3', 'GGBR4']
+text1 = st.text_input('Digite os tickers separados por vírgula e sem espaço')
+
+tickers = text1.split(',')
 
 for i, j in enumerate(tickers):
     if j.endswith('.SA'):
@@ -25,8 +25,10 @@ for i, j in enumerate(tickers):
     else:
         tickers[i] = j + '.SA'
 
+start = st.date_input('Período inicial')
+end = st.date_input('Período final')
 data = pdr.DataReader(tickers,data_source='yahoo',
-                        start='2020-01-01', end='2021-05-13')
+                        start=start, end=end)
 
 data.resample('D').ffill()
 
@@ -54,7 +56,38 @@ def plot_melted(df, yaxis = 'Preço Ajustado',dash = False):
     return fig, df_melt
 
 df_return = df.apply(lambda x: x/x[0])
+
+st.write("""
+# Gráfico de retornos diários
+""")
+df_perc_change = df.pct_change().dropna()
+fig3, df_perc_change_melted = plot_melted(df_perc_change, 'Retorno diário')
+
+st.plotly_chart(fig3,use_container_width=True)
+
+st.write("""
+# Gráfico de retornos diários acumulados
+""")
 fig1, df_return_melted = plot_melted(df_return, 
                     'Retorno diário acumulado', dash=True)
-
 st.plotly_chart(fig1,use_container_width=True)
+
+st.write("""
+# Gráfico de média de retornos diários vs Volatilidade (Desvio-padrão)
+""")
+
+mean_std = pd.DataFrame(df_perc_change.mean(),index=df_perc_change.mean().index, columns=['Média'])
+mean_std['Desvio-padrão'] = df_perc_change.std().values
+fig4 = px.scatter(mean_std.reset_index(), x="Desvio-padrão", y="Média",text='index')
+fig4.add_hline(0,line_dash='dash')
+
+st.plotly_chart(fig4, use_container_width=True)
+
+st.write("""
+# Análise de clusters hierárquicos das ações correlatas
+""")
+
+ax = sns.clustermap(data = df_return,row_cluster=False, metric='correlation',
+               figsize=(16,6),yticklabels=False,standard_scale=1,dendrogram_ratio=(.1, .2),cbar_pos=(0, .2, .03, .4))
+
+st.pyplot(ax, use_container_width=False)
