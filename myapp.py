@@ -57,7 +57,7 @@ def plot_melted(df, yaxis = 'Preço Ajustado',dash = False):
             ])
         )
     )
-    fig.show()
+
     return fig, df_melt
 
 st.write("""
