@@ -7,8 +7,10 @@ import plotly.figure_factory as ff
 import streamlit as st
 from datetime import datetime
 
-import pandas_datareader as pdr
 import yfinance as yf
+yf.pdr_override()
+import pandas_datareader as pdr
+from pandas_datareader import data as pdr
 
 sns.set()
 
@@ -32,7 +34,7 @@ for i, j in enumerate(tickers):
 
 start = st.sidebar.date_input('Período inicial',value=datetime(2020,1,1))
 end = st.sidebar.date_input('Período final')
-data = pdr.DataReader(tickers,data_source='yahoo',
+data = pdr.get_data_yahoo(tickers,data_source='yahoo',
                         start=start, end=end)
 
 data.resample('D').ffill()
