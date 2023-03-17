@@ -34,7 +34,7 @@ for i, j in enumerate(tickers):
 
 start = st.sidebar.date_input('Período inicial',value=datetime(2020,1,1))
 end = st.sidebar.date_input('Período final')
-data = pdr.get_data_yahoo(tickers,data_source='yahoo',
+data = pdr.get_data_yahoo(tickers,
                         start=start, end=end)
 
 data.resample('D').ffill()
