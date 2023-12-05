@@ -1,5 +1,8 @@
 install:
-	pip install --upgrade pip && pip install -r requirements.txt
+	poetry install
+
+export_poetry:
+	poetry export -o requirements.txt --without-hashes
 
 auto_commit:
 	git add . && git commit -m 'Update' && git push
