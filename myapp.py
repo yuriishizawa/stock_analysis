@@ -27,9 +27,7 @@ text1 = st.sidebar.text_area('Digite os tickers separados por vírgula e sem esp
 tickers = text1.split(',')
 
 for i, j in enumerate(tickers):
-    if j.endswith('.SA'):
-        pass
-    else:
+    if not j.endswith('.SA'):
         tickers[i] = j + '.SA'
 
 start = st.sidebar.date_input('Período inicial',value=datetime(2020,1,1))
@@ -50,13 +48,13 @@ def plot_melted(df, yaxis = 'Preço Ajustado',dash = False):
         fig.add_hline(1,line_dash="dash")
     fig.update_xaxes(
         rangeselector=dict(
-            buttons=list([
+            buttons=[
                 dict(count=1, label="1m", step="month", stepmode="backward"),
                 dict(count=6, label="6m", step="month", stepmode="backward"),
                 dict(count=1, label="YTD", step="year", stepmode="todate"),
                 dict(count=1, label="1y", step="year", stepmode="backward"),
-                dict(step="all")
-            ])
+                dict(step="all"),
+            ]
         )
     )
 
