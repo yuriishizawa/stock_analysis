@@ -1,0 +1,42 @@
+{
+    "autoDocstring.docstringFormat": "numpy",
+    "diffEditor.renderSideBySide": false,
+    "editor.acceptSuggestionOnEnter": "off",
+    "editor.guides.bracketPairs": true,
+    "editor.rulers": [
+      88
+    ],
+    "editor.stickyScroll.enabled": true,
+    "editor.suggestSelection": "first",
+    "gremlins.showInProblemPane": true,
+    "python.languageServer": "Pylance",
+    "redhat.telemetry.enabled": true,
+    "workbench.settings.editor": "json",
+    "[python]": {
+      "editor.formatOnSave": true,
+      "editor.formatOnPaste": true,
+      "editor.codeActionsOnSave": {
+        "source.fixAll": "explicit",
+        "source.organizeImports": "explicit"
+      },
+      "editor.defaultFormatter": "charliermarsh.ruff"
+    },
+    "terminal.integrated.env.windows": {
+      "PYTHONPATH": "${workspaceFolder}"
+    },
+    "terminal.integrated.env.linux": {
+      "PYTHONPATH": "${workspaceFolder}"
+    },
+    "terminal.integrated.env.osx": {
+      "PYTHONPATH": "${workspaceFolder}"
+    },
+    "[yaml]": {
+      "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
+    "[toml]": {
+      "editor.defaultFormatter": "tamasfe.even-better-toml"
+    },
+    "[json]": {
+      "editor.defaultFormatter": "vscode.json-language-features"
+    }
+  }
