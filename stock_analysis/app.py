@@ -150,4 +150,4 @@ def main():
 
     ax = ff.create_dendrogram(df_return.T, labels=df_return.columns)
 
-    st.plotly_chart(ax, use_container_width=False)
+    st.plotly_chart(ax, use_container_width=True)
