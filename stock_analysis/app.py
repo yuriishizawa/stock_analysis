@@ -59,6 +59,35 @@ def plot_melted(df, yaxis="Preço Ajustado", dash=False):
     return fig, df_melt
 
 
+def get_stock_data(tickers, start, end):
+    """
+    Função para obter dados de ações
+
+    Parâmetros
+    ----------
+    tickers : list
+        Lista de tickers
+    start : datetime
+        Data inicial
+    end : datetime
+        Data final
+    Retorno
+    -------
+    df_stock_data : pd.DataFrame
+        DataFrame com os dados
+    """
+    stock_data = pdr.get_data_yahoo(tickers, start=start, end=end)
+    stock_data.resample("D").ffill()
+
+    df_stock_data = pd.DataFrame(
+        stock_data["Adj Close"].values,
+        index=stock_data.index,
+        columns=stock_data["Adj Close"].columns.values,
+    )
+
+    return df_stock_data
+
+
 def main():
     """
     Função principal para análise de ações brasileiras
@@ -78,23 +107,12 @@ def main():
         value="BBAS3,ITSA4,VALE3,PETR4",
     )
 
-    tickers = text1.split(",")
-
-    for i, j in enumerate(tickers):
-        if not j.endswith(".SA"):
-            tickers[i] = j + ".SA"
+    tickers = format_tickers_with_suffix(text1)
 
     start = st.sidebar.date_input("Período inicial", value=datetime(2020, 1, 1))
     end = st.sidebar.date_input("Período final")
-    data = pdr.get_data_yahoo(tickers, start=start, end=end)
 
-    data.resample("D").ffill()
-
-    df = pd.DataFrame(
-        data["Adj Close"].values,
-        index=data.index,
-        columns=data["Adj Close"].columns.values,
-    )
+    stock_data = get_stock_data(tickers, start, end)
 
     st.write(
         """
@@ -104,7 +122,7 @@ def main():
     """
     )
 
-    df_return = df.apply(lambda x: x / x[0])
+    returns = stock_data.apply(lambda x: x / x[0])
 
     st.write(
         """
@@ -112,8 +130,8 @@ def main():
     """
     )
 
-    df_perc_change = df.pct_change().dropna()
-    fig3, _ = plot_melted(df_perc_change, "Retorno diário")
+    pct_returns = stock_data.pct_change().dropna()
+    fig3, _ = plot_melted(pct_returns, "Retorno diário")
 
     st.plotly_chart(fig3, use_container_width=True)
 
@@ -122,7 +140,7 @@ def main():
     ## Retornos diários acumulados
     """
     )
-    fig1, _ = plot_melted(df_return, "Retorno diário acumulado", dash=True)
+    fig1, _ = plot_melted(returns, "Retorno diário acumulado", dash=True)
     st.plotly_chart(fig1, use_container_width=True)
 
     st.write(
@@ -132,9 +150,9 @@ def main():
     )
 
     mean_std = pd.DataFrame(
-        df_perc_change.mean(), index=df_perc_change.mean().index, columns=["Média"]
+        pct_returns.mean(), index=pct_returns.mean().index, columns=["Média"]
     )
-    mean_std["Desvio-padrão"] = df_perc_change.std().values
+    mean_std["Desvio-padrão"] = pct_returns.std().values
     fig4 = px.scatter(
         mean_std.reset_index(), x="Desvio-padrão", y="Média", text="index"
     )
@@ -148,6 +166,31 @@ def main():
     """
     )
 
-    ax = ff.create_dendrogram(df_return.T, labels=df_return.columns)
+    ax = ff.create_dendrogram(returns.T, labels=returns.columns)
 
     st.plotly_chart(ax, use_container_width=True)
+
+
+def format_tickers_with_suffix(text1):
+    """
+    Função para formatar tickers com sufixo .SA
+
+    Parâmetros
+    ----------
+    text1 : str
+        String com os tickers
+    Retorno
+    -------
+    tickers : list
+        Lista de tickers formatados
+    """
+    # Remove espaços em branco e faz o split
+    tickers = [
+        ticker.upper() for ticker in text1.replace(" ", "").split(",") if ticker != ""
+    ]
+
+    # Adiciona sufixo .SA se não tiver, pois é o padrão para ações brasileiras
+    for i, j in enumerate(text1):
+        if not j.endswith(".SA"):
+            tickers[i] = j + ".SA"
+    return tickers
