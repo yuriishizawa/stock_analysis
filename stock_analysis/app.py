@@ -4,12 +4,17 @@ Módulo para análise de dados financeiros
 
 from datetime import datetime
 
+import numpy as np
 import pandas as pd
 import plotly.express as px
 import plotly.figure_factory as ff
 import streamlit as st
 import yfinance as yf
 from pandas_datareader import data as pdr
+
+from stock_analysis import logger
+
+yf.pdr_override()
 
 
 def plot_melted(df, yaxis="Preço Ajustado", dash=False):
@@ -77,7 +82,7 @@ def get_stock_data(tickers, start, end):
         DataFrame com os dados
     """
     stock_data = pdr.get_data_yahoo(tickers, start=start, end=end)
-    stock_data.resample("D").ffill()
+    stock_data = stock_data.resample("D").ffill()
 
     df_stock_data = pd.DataFrame(
         stock_data["Adj Close"].values,
@@ -88,11 +93,90 @@ def get_stock_data(tickers, start, end):
     return df_stock_data
 
 
+def format_tickers_with_suffix(tickers_str):
+    """
+    Função para formatar tickers com sufixo .SA
+
+    Parâmetros
+    ----------
+    text1 : str
+        String com os tickers
+    Retorno
+    -------
+    tickers : list
+        Lista de tickers formatados
+    """
+    # Remove espaços em branco e faz o split
+    tickers = [
+        ticker.upper()
+        for ticker in tickers_str.replace(" ", "").split(",")
+        if ticker != ""
+    ]
+
+    # Adiciona sufixo .SA se não tiver, pois é o padrão para ações brasileiras
+    for i, j in enumerate(tickers):
+        if not j.endswith(".SA"):
+            tickers[i] = j + ".SA"
+    logger.info(f"Tickers ajustados: {tickers}")
+    return tickers
+
+
+def generate_portifolio(stock_data, max_share=10):
+    portifolio = pd.DataFrame(stock_data.T.iloc[:, 0])
+    portifolio.columns = ["Preço Ajustado"]
+
+    sectors = []
+
+    for column in portifolio.index:
+        sectors.append(yf.Ticker(column).info["sector"])
+
+    portifolio["Setor"] = sectors
+    portifolio["Quantidade"] = np.random.randint(1, 1000, size=portifolio.shape[0])
+    portifolio["Total Investido"] = (
+        portifolio["Preço Ajustado"]
+        .mul(portifolio["Quantidade"])
+        .apply(lambda x: round(x, 2))
+    )
+    portifolio["Porc. da Carteira"] = (
+        portifolio["Total Investido"].div(portifolio["Total Investido"].sum()).mul(100)
+    )
+
+    portifolio["pct_aux"] = np.where(
+        portifolio["Porc. da Carteira"] > max_share,
+        max_share,
+        portifolio["Porc. da Carteira"],
+    )
+
+    portifolio["Quantidade"] = (
+        (
+            portifolio["Quantidade"].mul(
+                portifolio["pct_aux"].div(portifolio["Porc. da Carteira"])
+            )
+        )
+        // 100
+        * 100
+    )
+
+    portifolio["Quantidade"] = np.where(
+        portifolio["Quantidade"] < 100, 100, portifolio["Quantidade"]
+    )
+
+    portifolio["Total Investido"] = (
+        portifolio["Preço Ajustado"]
+        .mul(portifolio["Quantidade"])
+        .apply(lambda x: round(x, 2))
+    )
+    portifolio["Porc. da Carteira"] = (
+        portifolio["Total Investido"].div(portifolio["Total Investido"].sum()).mul(100)
+    )
+
+    return portifolio.drop(columns=["pct_aux"]).reset_index(names=["Ticker"])
+
+
 def main():
     """
     Função principal para análise de ações brasileiras
     """
-    yf.pdr_override()
 
     st.sidebar.title(
         """
@@ -169,28 +253,3 @@ def main():
     ax = ff.create_dendrogram(returns.T, labels=returns.columns)
 
     st.plotly_chart(ax, use_container_width=True)
-
-
-def format_tickers_with_suffix(text1):
-    """
-    Função para formatar tickers com sufixo .SA
-
-    Parâmetros
-    ----------
-    text1 : str
-        String com os tickers
-    Retorno
-    -------
-    tickers : list
-        Lista de tickers formatados
-    """
-    # Remove espaços em branco e faz o split
-    tickers = [
-        ticker.upper() for ticker in text1.replace(" ", "").split(",") if ticker != ""
-    ]
-
-    # Adiciona sufixo .SA se não tiver, pois é o padrão para ações brasileiras
-    for i, j in enumerate(text1):
-        if not j.endswith(".SA"):
-            tickers[i] = j + ".SA"
-    return tickers
