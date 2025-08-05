@@ -48,5 +48,10 @@
     },
     "[json]": {
       "editor.defaultFormatter": "vscode.json-language-features"
-    }
+    },
+    "github.copilot.chat.commitMessageGeneration.instructions": [
+        {
+            "text": "Use conventional commit message format. Use the following format: \n\n<type>(<scope>): <description>\n\n <detailed description>.\n\nWhere <type> is one of the following: feat, fix, chore, docs, style, refactor, perf, test, build, ci, revert. <scope> is the scope of the change (optional). <description> is a short description of the change. <detailed description> is a detailed description of the changes. \n\n Example: feat(api): add new endpoint\n\nThis commit adds a new API endpoint for user registration.\n\n",
+        }
+    ],
   }
