@@ -10,11 +10,8 @@ import plotly.express as px
 import plotly.figure_factory as ff
 import streamlit as st
 import yfinance as yf
-from pandas_datareader import data as pdr
 
 from stock_analysis import logger
-
-yf.pdr_override()
 
 
 def plot_melted(df, yaxis="Preço Ajustado", dash=False):
@@ -81,16 +78,20 @@ def get_stock_data(tickers, start, end):
     df_stock_data : pd.DataFrame
         DataFrame com os dados
     """
-    stock_data = pdr.get_data_yahoo(tickers, start=start, end=end)
-    stock_data = stock_data.resample("D").ffill()
-
-    df_stock_data = pd.DataFrame(
-        stock_data["Adj Close"].values,
-        index=stock_data.index,
-        columns=stock_data["Adj Close"].columns.values,
+    # Utilizando yfinance diretamente para obter os dados
+    data = yf.download(
+        tickers, start=start, end=end, group_by="ticker", auto_adjust=False
     )
-
-    return df_stock_data
+    # Se apenas um ticker, ajustar formato
+    if len(tickers) == 1:
+        adj_close = data["Adj Close"].to_frame()
+        adj_close.columns = tickers
+    else:
+        adj_close = pd.DataFrame(
+            {ticker: data[ticker]["Adj Close"] for ticker in tickers}
+        )
+    adj_close = adj_close.resample("D").ffill()
+    return adj_close
 
 
 def format_tickers_with_suffix(tickers_str):

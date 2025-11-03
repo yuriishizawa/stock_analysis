@@ -1,4 +1,7 @@
 # Stock Analysis
+
+---
+
 This application can be used for preliminary analysis of stocks on the Brazilian stock exchange.
 
 You can access the application directly via [Streamlit](https://share.streamlit.io/yuriishizawa/stock_analysis/main/myapp.py).
@@ -8,14 +11,14 @@ You can access the application directly via [Streamlit](https://share.streamlit.
 Before you begin, ensure you have installed:
 
 * Python 3.10 or higher
-* [Poetry](https://python-poetry.org/docs/#installation)
+* [uv](https://astral.sh/uv/) for managing virtual environments
 
 ## Installation
 
 To install the project dependencies, run the following command in your terminal:
 
 ```bash
-poetry install
+uv install
 ```
 
 ## Usage
@@ -23,7 +26,7 @@ poetry install
 To start the application, run the following command in your terminal:
 
 ```bash
-poetry run streamlit run myapp.py
+uv run streamlit run myapp.py
 ```
 
 In the Streamlit interface, you can input the tickers of the stocks you want to analyze in the text box. The tickers should be separated by commas and without spaces. For example: `"BBAS3,ITSA4,VALE3,PETR4"`.
