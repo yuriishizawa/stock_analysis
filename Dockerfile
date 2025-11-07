@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Create a non-root user with dedicated group
 RUN addgroup --system appuser && \
-    adduser --system --home /app --no-create-home --ingroup appuser appuser
+    adduser --system --no-create-home --ingroup appuser appuser
 
 # COPY requirements.txt ./requirements.txt
 # RUN pip3 install -r requirements.txt
