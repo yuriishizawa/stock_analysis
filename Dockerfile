@@ -1,6 +1,11 @@
 FROM python:3.10
 EXPOSE 8501
 WORKDIR /app
+
+# Create a non-root user with dedicated group
+RUN addgroup --system appuser && \
+    adduser --system --home /app --no-create-home --ingroup appuser appuser
+
 # COPY requirements.txt ./requirements.txt
 # RUN pip3 install -r requirements.txt
 
@@ -13,9 +18,8 @@ RUN pip install poetry==1.5.0 && \
 
 COPY . .
 
-# Create a non-root user and switch to it
-RUN adduser --system --home /app --no-create-home appuser && \
-    chown -R appuser:nogroup /app
+# Change ownership of application files to non-root user
+RUN chown -R appuser:appuser /app
 
 USER appuser
 
