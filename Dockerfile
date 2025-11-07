@@ -13,5 +13,11 @@ RUN pip install poetry==1.5.0 && \
 
 COPY . .
 
+# Create a non-root user and switch to it
+RUN adduser --system --home /app --no-create-home appuser && \
+    chown -R appuser:nogroup /app
+
+USER appuser
+
 ENTRYPOINT ["streamlit"]
 CMD ["run", "myapp.py"]
