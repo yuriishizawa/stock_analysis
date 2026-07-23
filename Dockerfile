@@ -9,12 +9,11 @@ RUN addgroup --system appuser && \
 # COPY requirements.txt ./requirements.txt
 # RUN pip3 install -r requirements.txt
 
-COPY pyproject.toml poetry.lock ./
+COPY pyproject.toml ./
 
-RUN pip install poetry==1.5.0 && \
+RUN pip install "poetry>=2.0.0" && \
     poetry config virtualenvs.create false && \
-    poetry install --no-dev && \
-    poetry shell
+    poetry install --only main --no-root
 
 COPY . .
 
