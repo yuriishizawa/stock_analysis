@@ -9,11 +9,10 @@ RUN addgroup --system appuser && \
 # COPY requirements.txt ./requirements.txt
 # RUN pip3 install -r requirements.txt
 
-COPY pyproject.toml ./
+COPY pyproject.toml uv.lock ./
 
-RUN pip install "poetry>=2.0.0" && \
-    poetry config virtualenvs.create false && \
-    poetry install --only main --no-root
+RUN pip install uv && \
+    uv sync --frozen --no-dev
 
 COPY . .
 
@@ -22,5 +21,5 @@ RUN chown -R appuser:appuser /app
 
 USER appuser
 
-ENTRYPOINT ["streamlit"]
+ENTRYPOINT ["uv", "run", "streamlit"]
 CMD ["run", "myapp.py"]
